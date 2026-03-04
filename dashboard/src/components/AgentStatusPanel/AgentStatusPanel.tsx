@@ -15,6 +15,8 @@ export interface AgentStatusPanelProps {
   agents: AgentStatus[];
   registryHealthy: boolean;
   isStreaming?: boolean;
+  onSelectAgent?: (id: string) => void;
+  selectedAgentId?: string | null;
   className?: string;
 }
 
@@ -22,6 +24,8 @@ export function AgentStatusPanel({
   agents,
   registryHealthy,
   isStreaming = false,
+  onSelectAgent,
+  selectedAgentId,
   className,
 }: AgentStatusPanelProps) {
   const defaultAgents: AgentStatus[] = [
@@ -51,9 +55,11 @@ export function AgentStatusPanel({
         {list.map((a) => (
           <li
             key={a.id}
+            onClick={() => onSelectAgent?.(a.id)}
             className={clsx(
-              "flex items-center justify-between rounded px-2 py-1.5 text-xs",
-              isStreaming && a.status === "running" && "bg-[var(--border)]"
+              "flex items-center justify-between rounded px-2 py-1.5 text-xs cursor-pointer transition-colors",
+              isStreaming && a.status === "running" && "bg-[var(--border)]",
+              selectedAgentId === a.id ? "border border-[var(--fundamental)] bg-[var(--fundamental)]/5" : "border border-transparent hover:bg-[var(--background)]"
             )}
           >
             <span className="text-[var(--foreground)]">{AGENT_NAMES[a.id] ?? a.id}</span>
@@ -62,7 +68,7 @@ export function AgentStatusPanel({
               <span
                 className={clsx(
                   "h-1.5 w-1.5 rounded-full",
-                  a.status === "running" && "bg-[var(--fundamental)]",
+                  a.status === "running" && "bg-[var(--fundamental)] anim-pulse",
                   a.status === "idle" && "bg-[var(--muted)]",
                   a.status === "error" && "bg-[var(--risk)]"
                 )}
@@ -71,6 +77,9 @@ export function AgentStatusPanel({
           </li>
         ))}
       </ul>
+      <p className="mt-3 text-[10px] text-[var(--muted)] leading-tight italic">
+        Click an agent to open direct interaction bridge.
+      </p>
     </div>
   );
 }
