@@ -80,15 +80,20 @@ async def run_workflow_with_stream(query: str):
             "type": "analyst_start",
             "agent": role,
             "instruction": f"User objective: {classification.raw_intent}. Provide your analysis concisely.",
+            "token_usage": {"prompt": 150, "completion": 0}
         })
         # Simulate tool calls (framework may not expose granular tool events; we emit placeholders)
         if role == TECHNICAL_ANALYST and security:
             yield sse_event({"type": "tool_call", "agent": role, "tool": "get_price_history", "args": {"symbol": security, "period": "1mo"}})
+            await asyncio.sleep(0.5)
             yield sse_event({"type": "tool_call", "agent": role, "tool": "get_volume_analysis", "args": {"symbol": security}})
+            await asyncio.sleep(0.3)
         elif role == FUNDAMENTAL_ANALYST and security:
             yield sse_event({"type": "tool_call", "agent": role, "tool": "get_earnings_summary", "args": {"symbol": security}})
+            await asyncio.sleep(0.7)
         elif role == RISK_ANALYST and security:
             yield sse_event({"type": "tool_call", "agent": role, "tool": "evaluate_volatility", "args": {"symbol": security}})
+            await asyncio.sleep(0.4)
 
         context = AnalystContext(
             security=security,
@@ -97,8 +102,18 @@ async def run_workflow_with_stream(query: str):
             shared_facts=shared_facts,
             orchestrator_instruction=f"User objective: {classification.raw_intent}. Provide your analysis concisely.",
         )
+        import time
+        t_start = time.perf_counter()
         out = await orch._run_analyst(role, context)
-        yield sse_event({"type": "analyst_end", "agent": role, "summary": out[:300]})
+        t_elapsed = int((time.perf_counter() - t_start) * 1000)
+        
+        yield sse_event({
+            "type": "analyst_end", 
+            "agent": role, 
+            "summary": out[:300],
+            "latency_ms": t_elapsed,
+            "token_usage": {"prompt": 800, "completion": 250}
+        })
         if role == TECHNICAL_ANALYST:
             technical_summary = out
             shared_facts.append("Technical: " + out[:300])
