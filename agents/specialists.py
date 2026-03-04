@@ -21,23 +21,17 @@ from tools.risk_tools import (
 from agents.registry import TECHNICAL_ANALYST, FUNDAMENTAL_ANALYST, RISK_ANALYST
 
 
-FUNDAMENTAL_INSTRUCTIONS = """You are a Fundamental Analyst Agent for securities trading.
-Your role is to analyze market fundamentals: earnings reports, income statements, balance sheets, and macroeconomic indicators.
-Use your tools to fetch data (earnings, income statement, balance sheet, macro indicators) and provide a concise, factual summary.
-Focus on valuation-relevant metrics and growth. Do not make price targets or trading recommendations; only report fundamental findings.
-If the user or context provides a ticker or sector, use it in your tool calls. Reuse any shared facts provided in the context to avoid redundant tool calls."""
+DISCOVERY_INSTRUCTIONS = """You are a Discovery Sub-agent for the Earth Intelligence System (EIS).
+Your NLU is tuned for academic pre-prints (arXiv), patent filings, and 'Dark Data' (non-indexed lab logs, intranets).
+Your role is to scan for breakthroughs, early signals, and intellectual property that might impact a Grand Challenge.
+Use your tools to search arXiv, Patents, Dark Data, and Institutional programs.
+Synthesize findings into signals that feed the Lead Researcher's 'Problem Genome' map."""
 
-TECHNICAL_INSTRUCTIONS = """You are a Technical Analyst Agent for securities trading.
-Your role is to analyze price movements, chart patterns, volume, and moving averages.
-Use your tools to fetch price history, volume, moving averages, and price summaries. Provide a concise technical assessment.
-Do not make fundamental or risk conclusions; only report technical findings. Use the security/sector from context when provided.
-Reuse any shared facts provided in the context to avoid redundant tool calls."""
-
-RISK_INSTRUCTIONS = """You are a Risk Management Agent for securities trading.
-Your role is to evaluate downside risk, volatility, and compliance with trading limits before a strategy is finalized.
-Use your tools to evaluate volatility, position limit compliance, and downside risk. Provide a clear risk assessment.
-Do not recommend entries or targets; only state whether risk is acceptable and any limit breaches or caveats.
-Use the security from context when provided."""
+VERIFICATION_INSTRUCTIONS = """You are a Verification Sub-agent for the Earth Intelligence System (EIS).
+Your role is to validate that a proposed solution meets the 'Remarkable' threshold defined in the Problem Genome.
+You utilize autonomous simulations and Zero-Knowledge Proofs (ZKP) to verify validity without exposing core solution data.
+Use your tools to cross-reference benchmarks, evaluate fragility, run simulations, and generate proofs.
+Determine if a challenge remains 'unbeaten' or if a valid, remarkable solution has been encapsulated."""
 
 
 def build_fundamental_analyst(client: AzureOpenAIResponsesClient):
@@ -77,5 +71,47 @@ def build_risk_analyst(client: AzureOpenAIResponsesClient):
             evaluate_volatility,
             evaluate_position_limit_compliance,
             evaluate_downside_risk,
+        ],
+    )
+
+
+def build_discovery_agent(client: AzureOpenAIResponsesClient):
+    """Build the Discovery agent with refined discovery tools."""
+    from tools.discovery_tools import (
+        search_arxiv, 
+        search_un_global_issues, 
+        search_world_bank_challenges,
+        search_patents,
+        scan_dark_data
+    )
+    return client.create_agent(
+        name="discovery_agent",
+        instructions=DISCOVERY_INSTRUCTIONS,
+        tools=[
+            search_arxiv,
+            search_un_global_issues,
+            search_world_bank_challenges,
+            search_patents,
+            scan_dark_data,
+        ],
+    )
+
+
+def build_verification_agent(client: AzureOpenAIResponsesClient):
+    """Build the Verification agent with simulation and ZKP tools."""
+    from tools.verification_tools import (
+        cross_reference_benchmarks, 
+        evaluate_fragility,
+        generate_zkp_proof,
+        run_autonomous_simulation
+    )
+    return client.create_agent(
+        name="verification_agent",
+        instructions=VERIFICATION_INSTRUCTIONS,
+        tools=[
+            cross_reference_benchmarks,
+            evaluate_fragility,
+            generate_zkp_proof,
+            run_autonomous_simulation,
         ],
     )
