@@ -10,7 +10,17 @@ class AnalysisType(str, Enum):
     FUNDAMENTAL = "fundamental"
     BOTH = "both"
     RISK_ONLY = "risk_only"
+    DISCOVERY = "discovery"  # EIS: Scan for breakthroughs
+    VERIFICATION = "verification" # EIS: Cross-reference benchmarks
+    GRAND_CHALLENGE = "grand_challenge" # EIS: Full World Host intake
     UNKNOWN = "unknown"
+
+
+class ProblemTier(str, Enum):
+    """The three primary tiers of challenges in the Earth Intelligence System."""
+    FORMAL = "formal"          # Millennium Prize, etc.
+    INSTITUTIONAL = "institutional" # UN, World Bank, etc.
+    FRONTIER = "frontier"      # arXiv, SciELO pre-prints
 
 
 class ClassifierOutput(BaseModel):
@@ -42,3 +52,40 @@ class SecuritiesTradingStrategy(BaseModel):
     rationale: str = Field(description="Combined rationale for the strategy")
     conditions: list[str] = Field(default_factory=list, description="Conditions under which strategy holds")
     warnings: list[str] = Field(default_factory=list, description="Risk warnings and caveats")
+
+
+# --- Earth Intelligence System (EIS) Schemas ---
+
+class FragilityRanking(BaseModel):
+    """How likely a challenge is to be solved soon vs resistant."""
+    score: int = Field(ge=1, le=100, description="1=Centuries resistant, 100=Solved soon")
+    rationale: str = Field(description="Why this fragility score was assigned")
+
+
+class ProblemGenome(BaseModel):
+    """The machine-readable definition of a grand challenge."""
+    challenge_id: str
+    title: str
+    tier: ProblemTier
+    fragility: FragilityRanking
+    constraints: list[str]
+    success_metrics: list[str]
+    domain: str = Field(description="e.g. Advanced Bio, Future Energy, Quantum")
+    raw_source: str = Field(description="e.g. Clay Math, UN Global Issues")
+
+
+class SolutionBounty(BaseModel):
+    """The strategic cost evaluation for a 'remarkable answer'."""
+    compute_weight_gpu_hours: float
+    intelligence_premium_usd: float
+    total_quote_usd: float
+    proof_of_solution_hash: Optional[str] = Field(default=None, description="Zero-knowledge proof identifier")
+
+
+class WorldHostResponse(BaseModel):
+    """The finalized response from the Lead Researcher to the World Host."""
+    genome: ProblemGenome
+    bounty: SolutionBounty
+    is_unbeatable: bool = Field(description="Whether current intelligence can solve it immediately")
+    research_plan: list[str]
+    status: str = Field(default="Active / Decoupled / Vaulted")
