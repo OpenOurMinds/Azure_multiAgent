@@ -18,23 +18,23 @@ interface Edge {
 }
 
 const NODES: Node[] = [
-  { id: "query", label: "User Query", x: 50, y: 100, type: "input" },
-  { id: "classifier", label: "Classifier", x: 150, y: 100, type: "agent" },
-  { id: "technical_analyst", label: "Technical", x: 300, y: 50, type: "agent" },
-  { id: "fundamental_analyst", label: "Fundamental", x: 300, y: 150, type: "agent" },
-  { id: "risk_analyst", label: "Risk Manager", x: 450, y: 100, type: "agent" },
-  { id: "orchestrator", label: "Orchestrator", x: 600, y: 100, type: "agent" },
-  { id: "strategy", label: "Strategy", x: 750, y: 100, type: "output" },
+  { id: "query", label: "World Host Intake", x: 50, y: 100, type: "input" },
+  { id: "lead_researcher", label: "Lead Researcher", x: 180, y: 100, type: "agent" },
+  { id: "discovery_agent", label: "Discovery", x: 350, y: 50, type: "agent" },
+  { id: "verification_agent", label: "Verification", x: 350, y: 150, type: "agent" },
+  { id: "problem_genome", label: "Problem Genome", x: 520, y: 100, type: "agent" },
+  { id: "compute_swarm", label: "Compute Swarm", x: 680, y: 100, type: "agent" },
+  { id: "vault", label: "The Vault", x: 800, y: 100, type: "output" },
 ];
 
 const EDGES: Edge[] = [
-  { from: "query", to: "classifier" },
-  { from: "classifier", to: "technical_analyst" },
-  { from: "classifier", to: "fundamental_analyst" },
-  { from: "technical_analyst", to: "risk_analyst" },
-  { from: "fundamental_analyst", to: "risk_analyst" },
-  { from: "risk_analyst", to: "orchestrator" },
-  { from: "orchestrator", to: "strategy" },
+  { from: "query", to: "lead_researcher" },
+  { from: "lead_researcher", to: "discovery_agent" },
+  { from: "lead_researcher", to: "verification_agent" },
+  { from: "discovery_agent", to: "problem_genome" },
+  { from: "verification_agent", to: "problem_genome" },
+  { from: "problem_genome", to: "compute_swarm" },
+  { from: "compute_swarm", to: "vault" },
 ];
 
 export interface WorkflowGraphProps {
@@ -85,7 +85,7 @@ export function WorkflowGraph({ agents, isStreaming, className }: WorkflowGraphP
           const fromNode = NODES.find((n) => n.id === edge.from)!;
           const toNode = NODES.find((n) => n.id === edge.to)!;
           const isActive = getStatus(edge.from) === "running" || getStatus(edge.to) === "running";
-          
+
           return (
             <path
               key={`${edge.from}-${edge.to}-${i}`}
@@ -104,7 +104,7 @@ export function WorkflowGraph({ agents, isStreaming, className }: WorkflowGraphP
         {NODES.map((node) => {
           const status = getStatus(node.id);
           const isActive = status === "running";
-          
+
           return (
             <g key={node.id} transform={`translate(${node.x},${node.y})`}>
               <rect
