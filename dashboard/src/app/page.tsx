@@ -13,6 +13,7 @@ import { WorkflowGraph } from "@/components/WorkflowGraph/WorkflowGraph";
 import { OperationalMetrics } from "@/components/OperationalMetrics/OperationalMetrics";
 import { AgentTerminal } from "@/components/AgentTerminal/AgentTerminal";
 import { ProblemGenomeView } from "@/components/ProblemGenome/ProblemGenomeView";
+import { SolutionVaultPanel } from "@/components/SolutionVault/SolutionVaultPanel";
 import type { SecuritiesTradingStrategy } from "@/types/streaming";
 import * as Tabs from "@radix-ui/react-tabs";
 
@@ -61,9 +62,10 @@ export default function CommandCenterPage() {
         </aside>
 
         <div className="flex flex-col gap-4 overflow-hidden">
-          <div className="grid grid-cols-2 gap-4 flex-none h-[240px]">
+          <div className="grid grid-cols-3 gap-4 flex-none h-[280px]">
             <StrategySynthesisView strategy={strategy} />
             <ProblemGenomeView />
+            <SolutionVaultPanel status="Pending" />
           </div>
 
           <div className="flex-1 flex flex-col gap-4 overflow-hidden">
