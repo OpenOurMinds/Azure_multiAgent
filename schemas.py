@@ -16,6 +16,11 @@ class AnalysisType(str, Enum):
     UNKNOWN = "unknown"
 
 
+class MissionIntake(BaseModel):
+    objective: str
+    constraints: List[str]
+    heuristics: Dict[str, float]
+
 class ProblemTier(str, Enum):
     """The three primary tiers of challenges in the Earth Intelligence System."""
     FORMAL = "formal"          # Millennium Prize, etc.
@@ -62,6 +67,14 @@ class FragilityRanking(BaseModel):
     rationale: str = Field(description="Why this fragility score was assigned")
 
 
+class SuccessHeuristics(BaseModel):
+    """Metrics that define a 'Remarkable' solve for a specific tier."""
+    minimum_rigor: int = Field(ge=1, le=10)
+    required_efficiency_gain: Optional[float] = None
+    novelty_threshold: float = Field(default=0.8)
+    adversarial_resistance: float = Field(default=0.9)
+
+
 class ProblemGenome(BaseModel):
     """The machine-readable definition of a grand challenge."""
     challenge_id: str
@@ -70,6 +83,7 @@ class ProblemGenome(BaseModel):
     fragility: FragilityRanking
     constraints: list[str]
     success_metrics: list[str]
+    heuristics: SuccessHeuristics
     domain: str = Field(description="e.g. Advanced Bio, Future Energy, Quantum")
     raw_source: str = Field(description="e.g. Clay Math, UN Global Issues")
 
